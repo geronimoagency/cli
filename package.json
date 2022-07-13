@@ -1,5 +1,5 @@
 {
-  "name": "decentraland",
+  "name": "@rlty-live/dcl-cli",
   "version": "3.11.0",
   "description": "Decentraland CLI developer tool.",
   "bin": {
@@ -19,9 +19,16 @@
     "test": "FORCE_COLOR=1 ava -T 5m --verbose",
     "test:dry": "FORCE_COLOR=1 ava -T 5m --update-snapshots",
     "test:ci": "FORCE_COLOR=1 ava -v --fail-fast -T 5m",
-    "test:win": "set FORCE_COLOR=1 ava -v --fail-fast -T 5m "
+    "test:win": "set FORCE_COLOR=1 ava -v --fail-fast -T 5m ",
+    "semantic-release": "semantic-release"
   },
-  "repository": "decentraland/cli",
+  "repository": {
+    "type": "git",
+    "url": "https:git@github.com:rlty-live/decentraland-cli.git"
+  },
+  "publishConfig": {
+    "@rlty-live:registry": "https://npm.pkg.github.com"
+  },
   "keywords": [
     "decentraland",
     "cli",
@@ -38,7 +45,7 @@
     ]
   },
   "license": "Apache-2.0",
-  "homepage": "https://github.com/decentraland/cli",
+  "homepage": "https://github.com/rlty-live/decentraland-cli",
   "devDependencies": {
     "@dcl/eslint-config": "^1.0.1",
     "@types/analytics-node": "^3.1.8",
@@ -67,6 +74,8 @@
     "@dcl/ecs-scene-utils": "^1.7.5",
     "@dcl/linker-dapp": "^0.3.0",
     "@dcl/schemas": "^4.14.1",
+    "@semantic-release/changelog": "^6.0.1",
+    "@semantic-release/git": "^10.0.1",
     "analytics-node": "^6.0.0",
     "archiver": "^5.3.1",
     "arg": "^5.0.1",
@@ -91,6 +100,7 @@
     "ora": "^5.4.1",
     "package-json": "^7.0.0",
     "portfinder": "^1.0.28",
+    "semantic-release": "^19.0.3",
     "semver": "^7.3.7",
     "typescript": "^4.6.3",
     "uuid": "^8.3.2",
@@ -105,5 +115,18 @@
   "userEngines": {
     "minNodeVersion": "14.0.0",
     "minNpmVersion": "6.0.0"
+  },
+  "release": {
+    "branches": [
+      "main"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/github",
+      "@semantic-release/git"
+    ]
   }
 }
