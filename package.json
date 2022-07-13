@@ -1,6 +1,6 @@
 {
   "name": "@rlty-live/dcl-cli",
-  "version": "1.0.0",
+  "version": "3.11.1",
   "description": "Decentraland CLI developer tool.",
   "bin": {
     "dcl": "dist/index.js"
