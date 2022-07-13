@@ -15,7 +15,7 @@ import { getSceneFile } from '../sceneJson'
 import { Decentraland } from '../lib/Decentraland'
 import { IFile } from '../lib/Project'
 import * as spinner from '../utils/spinner'
-// import { debug } from '../utils/logging'
+import { debug } from '../utils/logging'
 import { buildTypescript, checkECSAndCLIVersions } from '../utils/moduleHelpers'
 import { validateScene } from '../sceneJson/utils'
 import { ErrorType, fail } from '../utils/errors'
@@ -188,15 +188,16 @@ export async function main(): Promise<void> {
 
   console.log(sceneUrl)
 
-  // try {
-  //   const response = (await catalyst.deploy(deployData, {
-  //     timeout: '10m'
-  //   })) as { message?: string }
-  //   project.setDeployInfo({ status: 'success' })
-  // } catch (error: any) {
-  //   debug('\n' + error.stack)
-  //   failWithSpinner('Could not upload content', error)
-  // }
+  try {
+    // @ts-ignore
+    const response = (await catalyst.deploy(deployData, {
+      timeout: '10m'
+    })) as { message?: string }
+    project.setDeployInfo({ status: 'success' })
+  } catch (error: any) {
+    debug('\n' + error.stack)
+    failWithSpinner('Could not upload content', error)
+  }
 
   return
 }
