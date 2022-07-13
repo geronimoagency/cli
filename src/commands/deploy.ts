@@ -7,18 +7,16 @@ import {
   DeploymentBuilder
 } from 'dcl-catalyst-client'
 import { Authenticator } from '@dcl/crypto'
-import { ChainId, getChainName, EntityType } from '@dcl/schemas'
-import opn from 'opn'
+import { EntityType } from '@dcl/schemas'
+// import opn from 'opn'
 
 import { isTypescriptProject } from '../project/isTypescriptProject'
 import { getSceneFile } from '../sceneJson'
 import { Decentraland } from '../lib/Decentraland'
 import { IFile } from '../lib/Project'
-import { LinkerResponse } from '../lib/LinkerAPI'
 import * as spinner from '../utils/spinner'
-import { debug } from '../utils/logging'
+// import { debug } from '../utils/logging'
 import { buildTypescript, checkECSAndCLIVersions } from '../utils/moduleHelpers'
-import { Analytics } from '../utils/analytics'
 import { validateScene } from '../sceneJson/utils'
 import { ErrorType, fail } from '../utils/errors'
 
@@ -61,14 +59,26 @@ export async function main(): Promise<void> {
     '--skip-build': Boolean,
     '--https': Boolean,
     '--force-upload': Boolean,
-    '--yes': Boolean
+    '--yes': Boolean,
+    '--wallet': String,
+    '--signature': String,
   })
-
-  Analytics.deploy()
 
   if (args['--target'] && args['--target-content']) {
     throw new Error(
       `You can't set both the 'target' and 'target-content' arguments.`
+    )
+  }
+
+  if (!args['--signature']) {
+    throw new Error(
+      'You must pass the signature to upload data automatically'
+    )
+  }
+
+  if (!args['--wallet']) {
+    throw new Error(
+      'You must pass the wallet address to upload data automatically'
     )
   }
 
@@ -79,8 +89,6 @@ export async function main(): Promise<void> {
   if (!skipVersionCheck) {
     await checkECSAndCLIVersions(workDir)
   }
-
-  spinner.create('Building scene in production mode')
 
   if (!(await isTypescriptProject(workDir))) {
     failWithSpinner(
@@ -96,7 +104,6 @@ export async function main(): Promise<void> {
         production: true,
         silence: true
       })
-      spinner.succeed('Scene built successfully')
     } catch (error) {
       const message = 'Build /scene in production mode failed'
       failWithSpinner(message, error)
@@ -104,8 +111,6 @@ export async function main(): Promise<void> {
   } else {
     spinner.succeed()
   }
-
-  spinner.create('Creating deployment structure')
 
   const dcl = new Decentraland({
     isHttps: !!args['--https'],
@@ -135,6 +140,7 @@ export async function main(): Promise<void> {
   // Create scene.json
   const sceneJson = await getSceneFile(workDir)
 
+  // @ts-ignore
   const { entityId, files: entityFiles } = await DeploymentBuilder.buildEntity({
     type: EntityType.SCENE,
     pointers: findPointers(sceneJson),
@@ -142,49 +148,18 @@ export async function main(): Promise<void> {
     metadata: sceneJson
   })
 
-  spinner.succeed('Deployment structure created.')
-
   //  Validate scene.json
-  validateScene(sceneJson, true)
+  validateScene(sceneJson, false)
 
-  dcl.on('link:ready', ({ url, params }) => {
-    console.log(
-      chalk.bold('You need to sign the content before the deployment:')
-    )
-    spinner.create(`Signing app ready at ${url}`)
-
-    setTimeout(async () => {
-      try {
-        await opn(`${url}?${params}`)
-      } catch (e) {
-        console.log(`Unable to open browser automatically`)
-      }
-    }, 5000)
-
-    dcl.on(
-      'link:success',
-      ({ address, signature, chainId }: LinkerResponse) => {
-        spinner.succeed(`Content successfully signed.`)
-        console.log(`${chalk.bold('Address:')} ${address}`)
-        console.log(`${chalk.bold('Signature:')} ${signature}`)
-        console.log(`${chalk.bold('Network:')} ${getChainName(chainId!)}`)
-      }
-    )
-  })
-
-  // Signing message
-  const messageToSign = entityId
-  const { signature, address, chainId } = await dcl.getAddressAndSignature(
-    messageToSign
-  )
   const authChain = Authenticator.createSimpleAuthChain(
     entityId,
-    address,
-    signature
+    args['--wallet'],
+    args['--signature']
   )
 
   // Uploading data
   let catalyst: ContentAPI
+  let customCatalyst = false
 
   if (args['--target']) {
     let target = args['--target']
@@ -192,36 +167,37 @@ export async function main(): Promise<void> {
       target = target.slice(0, -1)
     }
     catalyst = new CatalystClient({ catalystUrl: target })
+    customCatalyst = true
   } else if (args['--target-content']) {
     const targetContent = args['--target-content']
     catalyst = new ContentClient({ contentUrl: targetContent })
+    customCatalyst = true
   } else {
     catalyst = await CatalystClient.connectedToCatalystIn({
       network: 'mainnet'
     })
   }
-  spinner.create(`Uploading data to: ${catalyst.getContentUrl()}`)
 
+  // @ts-ignore
   const deployData = { entityId, files: entityFiles, authChain }
   const position = sceneJson.scene.base
-  const network = chainId === ChainId.ETHEREUM_ROPSTEN ? 'ropsten' : 'mainnet'
-  const sceneUrl = `https://play.decentraland.org/?NETWORK=${network}&position=${position}`
+  const network = 'mainnet'
+  const sceneUrl = customCatalyst
+    ? `https://play.decentraland.org/?NETWORK=${network}&CATALYST=${catalyst.getContentUrl().replace('/content', '').replace('https://', '')}&position=${position}`
+    : `https://play.decentraland.org/?NETWORK=${network}&position=${position}`
 
-  try {
-    const response = (await catalyst.deploy(deployData, {
-      timeout: '10m'
-    })) as { message?: string }
-    project.setDeployInfo({ status: 'success' })
-    spinner.succeed(`Content uploaded. ${chalk.underline.bold(sceneUrl)}\n`)
-    Analytics.sceneDeploySuccess()
+  console.log(sceneUrl)
 
-    if (response.message) {
-      console.log(response.message)
-    }
-  } catch (error: any) {
-    debug('\n' + error.stack)
-    failWithSpinner('Could not upload content', error)
-  }
+  // try {
+  //   const response = (await catalyst.deploy(deployData, {
+  //     timeout: '10m'
+  //   })) as { message?: string }
+  //   project.setDeployInfo({ status: 'success' })
+  // } catch (error: any) {
+  //   debug('\n' + error.stack)
+  //   failWithSpinner('Could not upload content', error)
+  // }
+
   return
 }
 
