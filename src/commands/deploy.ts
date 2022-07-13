@@ -62,6 +62,7 @@ export async function main(): Promise<void> {
     '--yes': Boolean,
     '--wallet': String,
     '--signature': String,
+    '--dry': Boolean,
   })
 
   if (args['--target'] && args['--target-content']) {
@@ -188,15 +189,17 @@ export async function main(): Promise<void> {
 
   console.log(sceneUrl)
 
-  try {
-    // @ts-ignore
-    const response = (await catalyst.deploy(deployData, {
-      timeout: '10m'
-    })) as { message?: string }
-    project.setDeployInfo({ status: 'success' })
-  } catch (error: any) {
-    debug('\n' + error.stack)
-    failWithSpinner('Could not upload content', error)
+  if (!args['--dry']) {
+    try {
+      // @ts-ignore
+      const response = (await catalyst.deploy(deployData, {
+        timeout: '10m'
+      })) as { message?: string }
+      project.setDeployInfo({ status: 'success' })
+    } catch (error: any) {
+      debug('\n' + error.stack)
+      failWithSpinner('Could not upload content', error)
+    }
   }
 
   return
