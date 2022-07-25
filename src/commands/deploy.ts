@@ -62,6 +62,7 @@ export async function main(): Promise<void> {
     '--yes': Boolean,
     '--wallet': String,
     '--signature': String,
+    '--timestamp': Number,
     '--dry': Boolean,
   })
 
@@ -146,7 +147,8 @@ export async function main(): Promise<void> {
     type: EntityType.SCENE,
     pointers: findPointers(sceneJson),
     files: contentFiles,
-    metadata: sceneJson
+    metadata: sceneJson,
+    timestamp: args['--timestamp'] ?? Date.now()
   })
 
   //  Validate scene.json
@@ -154,8 +156,8 @@ export async function main(): Promise<void> {
 
   const authChain = Authenticator.createSimpleAuthChain(
     entityId,
-    args['--wallet'],
-    args['--signature']
+    args['--wallet'].replace(/^(?=\n)$|^\s*|\s*$|\n\n+/gm, ''),
+    args['--signature'].replace(/^(?=\n)$|^\s*|\s*$|\n\n+/gm, '')
   )
 
   // Uploading data

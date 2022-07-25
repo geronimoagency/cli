@@ -42,6 +42,7 @@ export async function main(): Promise<void> {
     '--https': Boolean,
     '--force-upload': Boolean,
     '--yes': Boolean,
+    '--timestamp': Number,
   })
 
   const workDir = process.cwd()
@@ -78,7 +79,8 @@ export async function main(): Promise<void> {
     type: EntityType.SCENE,
     pointers: findPointers(sceneJson),
     files: contentFiles,
-    metadata: sceneJson
+    metadata: sceneJson,
+    timestamp: args['--timestamp'] ?? Date.now()
   })
 
   //  Validate scene.json
