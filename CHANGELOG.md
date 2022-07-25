@@ -1,3 +1,11 @@
+## [1.0.2](https://github.com/rlty-live/decentraland-cli/compare/v1.0.1...v1.0.2) (2022-07-25)
+
+
+### Bug Fixes
+
+* build ([ed29ca4](https://github.com/rlty-live/decentraland-cli/commit/ed29ca4e59b8bbfbe9836c6ca251fa43f1adabdf))
+* message to sign should remains the same after build ([3efaf03](https://github.com/rlty-live/decentraland-cli/commit/3efaf038f222450190b51c938bab983c30e79336))
+
 ## [1.0.1](https://github.com/rlty-live/decentraland-cli/compare/v1.0.0...v1.0.1) (2022-07-25)
 
 
