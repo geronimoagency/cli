@@ -90,8 +90,6 @@ export async function main(): Promise<void> {
   const skipVersionCheck = args['--skip-version-checks']
   const skipBuild = args['--skip-build']
 
-  spinner.create('Creating deployment structure')
-
   const dcl = new Decentraland({
     isHttps: !!args['--https'],
     workingDir: workDir,
@@ -128,8 +126,6 @@ export async function main(): Promise<void> {
       const message = 'Build /scene in production mode failed'
       failWithSpinner(message, error)
     }
-  } else {
-    spinner.succeed()
   }
 
   // Obtain list of files to deploy
