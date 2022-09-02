@@ -1,5 +1,5 @@
 {
-  "name": "decentraland",
+  "name": "@rlty-live/dcl-cli",
   "version": "3.11.4",
   "description": "Decentraland CLI developer tool.",
   "bin": {
