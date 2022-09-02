@@ -1,3 +1,12 @@
+## [1.1.1](https://github.com/rlty-live/decentraland-cli/compare/v1.1.0...v1.1.1) (2022-09-02)
+
+
+### Bug Fixes
+
+* version ([11c2ba2](https://github.com/rlty-live/decentraland-cli/commit/11c2ba20ca82b8669b3f657e97e57daca9561d2c))
+* version ([35890b4](https://github.com/rlty-live/decentraland-cli/commit/35890b4945892bc192bf6703ce6dfe1e0b1bd8f7))
+* version ([e1bb0bf](https://github.com/rlty-live/decentraland-cli/commit/e1bb0bf20f30135a0d0e62e1ada609e72e07ce71))
+
 # [1.1.0](https://github.com/rlty-live/decentraland-cli/compare/v1.0.2...v1.1.0) (2022-09-02)
 
 
