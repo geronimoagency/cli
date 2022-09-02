@@ -1,6 +1,6 @@
 {
-  "name": "@rlty-live/dcl-cli",
-  "version": "1.0.2",
+  "name": "decentraland",
+  "version": "3.11.2",
   "description": "Decentraland CLI developer tool.",
   "bin": {
     "dcl": "dist/index.js"
@@ -72,8 +72,8 @@
   "dependencies": {
     "@dcl/crypto": "^3.0.1",
     "@dcl/ecs-scene-utils": "^1.7.5",
-    "@dcl/linker-dapp": "^0.3.0",
-    "@dcl/schemas": "^4.14.1",
+    "@dcl/linker-dapp": "^0.3.1-2875578761.commit-1f41149",
+    "@dcl/schemas": "^5.14.0",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/git": "^10.0.1",
     "analytics-node": "^6.0.0",

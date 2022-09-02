@@ -16,7 +16,7 @@ import { Decentraland } from '../lib/Decentraland'
 import { IFile } from '../lib/Project'
 import * as spinner from '../utils/spinner'
 import { debug } from '../utils/logging'
-import { buildTypescript, checkECSAndCLIVersions } from '../utils/moduleHelpers'
+import { buildTypescript } from '../utils/moduleHelpers'
 import { validateScene } from '../sceneJson/utils'
 import { ErrorType, fail } from '../utils/errors'
 
@@ -30,6 +30,7 @@ export const help = () => `
       -t, --target-content      Specifies the address and port for the target content server. Example: 'peer.decentraland.org/content'. Can't be set together with --target
       --skip-version-checks     Skip the ECS and CLI version checks, avoid the warning message and launch anyway
       --skip-build              Skip build before deploy
+      --skip-validations        Skip permissions verifications on the client side when deploying content
 
     ${chalk.dim('Example:')}
 
@@ -55,6 +56,7 @@ export async function main(): Promise<void> {
     '-t': '--target',
     '--target-content': String,
     '-tc': '--target-content',
+    '--skip-validations': String,
     '--skip-version-checks': Boolean,
     '--skip-build': Boolean,
     '--https': Boolean,
@@ -88,8 +90,24 @@ export async function main(): Promise<void> {
   const skipVersionCheck = args['--skip-version-checks']
   const skipBuild = args['--skip-build']
 
+  spinner.create('Creating deployment structure')
+
+  const dcl = new Decentraland({
+    isHttps: !!args['--https'],
+    workingDir: workDir,
+    forceDeploy: args['--force-upload'],
+    yes: args['--yes']
+  })
+
+  const project = dcl.workspace.getSingleProject()
+  if (!project) {
+    return failWithSpinner(
+      'Cannot deploy a workspace, please go to the project directory and run `dcl deploy` again there.'
+    )
+  }
+
   if (!skipVersionCheck) {
-    await checkECSAndCLIVersions(workDir)
+    await project.checkCLIandECSCompatibility()
   }
 
   if (!(await isTypescriptProject(workDir))) {
@@ -112,20 +130,6 @@ export async function main(): Promise<void> {
     }
   } else {
     spinner.succeed()
-  }
-
-  const dcl = new Decentraland({
-    isHttps: !!args['--https'],
-    workingDir: workDir,
-    forceDeploy: args['--force-upload'],
-    yes: args['--yes']
-  })
-
-  const project = dcl.workspace.getSingleProject()
-  if (!project) {
-    return failWithSpinner(
-      'Cannot deploy a workspace, please go to the project directory and run `dcl deploy` again there.'
-    )
   }
 
   // Obtain list of files to deploy

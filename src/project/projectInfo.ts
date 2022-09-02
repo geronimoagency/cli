@@ -1,6 +1,7 @@
-import path from 'path'
+import { sdk } from '@dcl/schemas'
+import { WearableJson } from '@dcl/schemas/dist/sdk'
 import fs, { readJsonSync } from 'fs-extra'
-import { generateValidator, sdk, Wearable } from '@dcl/schemas'
+import path from 'path'
 import { ASSET_JSON_FILE, WEARABLE_JSON_FILE } from '../utils/project'
 
 export type ProjectInfo = {
@@ -13,15 +14,16 @@ export function getProjectInfo(workDir: string): ProjectInfo | null {
   if (fs.existsSync(wearableJsonPath)) {
     try {
       const wearableJson = readJsonSync(wearableJsonPath)
-      const validator = generateValidator(Wearable.schema)
-      if (validator(wearableJson)) {
+      if (WearableJson.validate(wearableJson)) {
         return {
-          sceneId: wearableJson.id,
+          sceneId:
+            'smart-wearable-' +
+            wearableJson.name.replace(' ', '-').toLocaleLowerCase(),
           sceneType: sdk.ProjectType.PORTABLE_EXPERIENCE
         }
       } else {
-        const errors = (validator.errors || [])
-          .map((a) => `${a.dataPath} ${a.message}`)
+        const errors = (WearableJson.validate.errors || [])
+          .map((a) => `${a.data} ${a.message}`)
           .join('')
 
         if (errors.length > 0) {
