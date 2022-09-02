@@ -1,3 +1,22 @@
+# [1.1.0](https://github.com/rlty-live/decentraland-cli/compare/v1.0.2...v1.1.0) (2022-09-02)
+
+
+### Bug Fixes
+
+* deprecated endpoint ([#789](https://github.com/rlty-live/decentraland-cli/issues/789)) ([fe21c60](https://github.com/rlty-live/decentraland-cli/commit/fe21c607a5cf50f9501b39bdf027266acb26843b))
+* fix @dcl/schema version ([#778](https://github.com/rlty-live/decentraland-cli/issues/778)) ([bfc0915](https://github.com/rlty-live/decentraland-cli/commit/bfc09150d293249a7115233a0262044fb6a0ce7e))
+* npm package name ([6acb857](https://github.com/rlty-live/decentraland-cli/commit/6acb857c807a547857e3c153ec64b8f539186e80))
+* set version to 3.11.4 ([35c0597](https://github.com/rlty-live/decentraland-cli/commit/35c05977e2866de6017d1420a09355423487c402))
+* update linker-dapp version ([18e83d2](https://github.com/rlty-live/decentraland-cli/commit/18e83d2e47469af5419c8b824e6d6c99465e24f5))
+* use only wearable.json and include scene.json in `dcl pack` ([#808](https://github.com/rlty-live/decentraland-cli/issues/808)) ([77b8055](https://github.com/rlty-live/decentraland-cli/commit/77b8055d8bb872ce5b87abb0da7d840c1639c20b))
+
+
+### Features
+
+* add authorization server ([#801](https://github.com/rlty-live/decentraland-cli/issues/801)) ([4e5f405](https://github.com/rlty-live/decentraland-cli/commit/4e5f405eb381a2a649f49f7c49397453c00d68c5))
+* support both ecs6 and ecs7 project ([#788](https://github.com/rlty-live/decentraland-cli/issues/788)) ([49a3e5d](https://github.com/rlty-live/decentraland-cli/commit/49a3e5d8e1b23953c67e42f2b5cc083551cf02b9))
+* update from upstream to 3.11.2 ([087c8ca](https://github.com/rlty-live/decentraland-cli/commit/087c8cacb28c148af6ec61766481dc8f6fadbaf1))
+
 ## [1.0.2](https://github.com/rlty-live/decentraland-cli/compare/v1.0.1...v1.0.2) (2022-07-25)
 
 
