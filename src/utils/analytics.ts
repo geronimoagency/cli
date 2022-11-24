@@ -20,26 +20,39 @@ function isCI() {
   )
 }
 
-// eslint-disable-next-line @typescript-eslint/no-namespace
+function isEditor() {
+  return process.env.EDITOR === 'true'
+}
+
+export type AnalyticsProject = {
+  projectHash?: string
+  ecs?: {
+    ecsVersion: string
+    packageVersion: string
+  }
+  coords?: { x: number; y: number }
+  isWorkspace: boolean
+}
+
 export namespace Analytics {
-  export const sceneCreated = (properties?: any) =>
-    trackAsync('Scene created', properties)
-  export const preview = (properties?: any) =>
+  export const sceneCreated = (properties?: {
+    projectType: string
+    url?: string
+  }) => trackAsync('Scene created', properties)
+
+  export const startPreview = (properties: AnalyticsProject) =>
     trackAsync('Preview started', properties)
-  export const sceneDeploy = (properties?: any) =>
+
+  export const sceneStartDeploy = (properties?: any) =>
     trackAsync('Scene deploy started', properties)
-  export const sceneDeploySuccess = (properties?: any) =>
-    trackAsync('Scene deploy success', properties)
-  export const sceneLink = (properties?: any) =>
-    trackAsync('Scene ethereum link started', properties)
-  export const sceneLinkSuccess = (properties?: any) =>
-    trackAsync('Scene ethereum link succeeded', properties)
-  export const deploy = (properties?: any) =>
-    trackAsync('Scene deploy requested', properties)
-  export const pinRequest = (properties?: any) =>
-    trackAsync('Pin requested', properties)
-  export const pinSuccess = (properties?: any) =>
-    trackAsync('Pin success', properties)
+
+  export const sceneDeploySuccess = (
+    properties: Omit<AnalyticsProject, 'isWorkspace'>
+  ) => trackAsync('Scene deploy success', properties)
+
+  export const buildScene = (properties: AnalyticsProject) =>
+    trackAsync('Build scene', properties)
+
   export const infoCmd = (properties?: any) =>
     trackAsync('Info command', properties)
   export const statusCmd = (properties?: any) =>
@@ -56,26 +69,22 @@ export namespace Analytics {
         os: process.platform,
         createdAt: new Date().getTime(),
         isCI: isCI(),
+        isEditor: isEditor(),
         devId
       }
     })
   }
 
   export async function reportError(
-    workingDir: string,
     type: string,
     message: string,
     stackTrace: string
   ) {
-    return track(
-      'Error',
-      {
-        errorType: type,
-        message,
-        stackTrace
-      },
-      workingDir
-    )
+    return track('Error', {
+      errorType: type,
+      message,
+      stackTrace
+    })
   }
 
   export async function requestPermission() {
@@ -105,11 +114,7 @@ export namespace Analytics {
  * @param eventName The name of the event to be tracked
  * @param properties Any object containing serializable data
  */
-async function track(
-  eventName: string,
-  properties: any = {},
-  workingDir?: string
-) {
+async function track(eventName: string, properties: any = {}) {
   const { userId, trackStats } = getConfig()
 
   if (!(await isOnline())) {
@@ -123,6 +128,7 @@ async function track(
       nodeVersion: process.version,
       cliVersion: getInstalledCLIVersion(),
       isCI: isCI(),
+      isEditor: isEditor(),
       devId: userId
     }
 

@@ -26,8 +26,10 @@ export const help = () => `
     ${chalk.dim('Options:')}
 
       -h, --help                Displays complete help
+      -p, --port        [port]  Select a custom port for the development server
       -t, --target              Specifies the address and port for the target catalyst server. Defaults to peer.decentraland.org
       -t, --target-content      Specifies the address and port for the target content server. Example: 'peer.decentraland.org/content'. Can't be set together with --target
+      -b, --no-browser          Do not open a new browser window
       --skip-version-checks     Skip the ECS and CLI version checks, avoid the warning message and launch anyway
       --skip-build              Skip build before deploy
       --skip-validations        Skip permissions verifications on the client side when deploying content
@@ -56,7 +58,7 @@ export async function main(): Promise<void> {
     '-t': '--target',
     '--target-content': String,
     '-tc': '--target-content',
-    '--skip-validations': String,
+    '--skip-validations': Boolean,
     '--skip-version-checks': Boolean,
     '--skip-build': Boolean,
     '--https': Boolean,
@@ -65,6 +67,8 @@ export async function main(): Promise<void> {
     '--wallet': String,
     '--signature': String,
     '--timestamp': Number,
+    '--port': Number,
+    '--no-browser': Boolean,
     '--dry': Boolean,
   })
 
@@ -89,12 +93,23 @@ export async function main(): Promise<void> {
   const workDir = process.cwd()
   const skipVersionCheck = args['--skip-version-checks']
   const skipBuild = args['--skip-build']
+  // @ts-ignore
+  const noBrowser = args['--no-browser']
+  const port = args['--port']
+  const parsedPort = typeof port === 'string' ? parseInt(port, 10) : void 0
+  const linkerPort = parsedPort && Number.isInteger(parsedPort) ? parsedPort : void 0
 
   const dcl = new Decentraland({
     isHttps: !!args['--https'],
     workingDir: workDir,
     forceDeploy: args['--force-upload'],
-    yes: args['--yes']
+    yes: args['--yes'],
+    // validations are skipped for custom content servers
+    skipValidations:
+      !!args['--skip-validations'] ||
+      !!args['--target'] ||
+      !!args['--target-content'],
+    linkerPort
   })
 
   const project = dcl.workspace.getSingleProject()

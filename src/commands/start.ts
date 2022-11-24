@@ -33,6 +33,7 @@ export const help = () => `
       --web3                    Connects preview to browser wallet to use the associated avatar and account
       --skip-version-checks     Skip the ECS and CLI version checks, avoid the warning message and launch anyway
       --skip-build              Skip build and only serve the files in preview mode
+      --skip-install            Skip installing dependencies
       --desktop-client          Show URL to launch preview in the desktop client (BETA)
 
     ${chalk.dim('Examples:')}
@@ -55,6 +56,7 @@ export async function main() {
     '--no-watch': Boolean,
     '--ci': Boolean,
     '--skip-version-checks': Boolean,
+    '--skip-install': Boolean,
     '--web3': Boolean,
     '-h': '--help',
     '-p': '--port',
@@ -73,6 +75,7 @@ export async function main() {
   const watch = !args['--no-watch'] && !isCi && !skipBuild
   const workingDir = process.cwd()
   const skipVersionCheck = args['--skip-version-checks']
+  const skipInstall = args['--skip-install']
 
   const dcl = new Decentraland({
     previewPort: parseInt(args['--port']!, 10),
@@ -82,7 +85,22 @@ export async function main() {
 
   const enableWeb3 = args['--web3']
 
-  Analytics.preview()
+  const baseCoords = await dcl.workspace.getBaseCoords()
+  const hasPortableExperience = dcl.workspace.hasPortableExperience()
+
+  if (dcl.workspace.isSingleProject()) {
+    Analytics.startPreview({
+      projectHash: dcl.getProjectHash(),
+      ecs: await dcl.workspace.getSingleProject()!.getEcsPackageVersion(),
+      coords: baseCoords,
+      isWorkspace: false
+    })
+  } else {
+    Analytics.startPreview({
+      projectHash: dcl.getProjectHash(),
+      isWorkspace: true
+    })
+  }
 
   const online = await isOnline()
   const ecsVersions: Set<ECSVersion> = new Set()
@@ -93,7 +111,7 @@ export async function main() {
 
       const needDependencies = await project.needsDependencies()
 
-      if (needDependencies) {
+      if (needDependencies && !skipInstall) {
         if (online) {
           await installDependencies(
             project.getProjectWorkingDir(),
@@ -150,9 +168,6 @@ export async function main() {
 
     await lintSceneFile(project.getProjectWorkingDir())
   }
-
-  const baseCoords = await dcl.workspace.getBaseCoords()
-  const hasPortableExperience = dcl.workspace.hasPortableExperience()
 
   if (
     (enableWeb3 || hasPortableExperience) &&
